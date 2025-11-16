@@ -6,17 +6,30 @@ import DeviceCheck
 
 /// The primary networking request layer for a ProxLock key.
 public class PLSession {
+    /// The partial key shared by ProxLock when you added your bearer token to the web portal.
     public let partialKey: String
+    
+    /// The id for a this key in ProxLock.
     public let assosiationID: String
+    
+    /// The string that will ultimately be replaced by ProxLock with the final bearer token.
     public var bearerToken: String {
         "%ProxLock_PARTIAL_KEY:\(partialKey)%"
     }
     
+    /// Initializes ``PLSession``.
+    ///
+    /// - Parameters:
+    ///   - partialKey: The partial key shared by ProxLock when you added your bearer token to the web portal.
+    ///   - assosiationID: The id for a this key in ProxLock.
     public init(partialKey: String, assosiationID: String) {
         self.partialKey = partialKey
         self.assosiationID = assosiationID
     }
     
+    /// Translates your `URLRequest` into an object for ProxLock.
+    ///
+    /// - Important: This does not include any form of authorization header. To use the bearer token, simply call ``bearerToken`` where you would like the real token to be constructed.
     public func processURLRequest(_ request: URLRequest) async throws -> URLRequest {
         var request = request
         
@@ -39,7 +52,10 @@ public class PLSession {
         
         return request
     }
-    
+
+    /// A basic data request wrapper for `URLSession` that automatically wraps the request for ProxLock.
+    ///
+    /// - Important: This does not include any form of authorization header. To use the bearer token, simply call ``bearerToken`` where you would like the real token to be constructed.
     public func data(for request: URLRequest, from session: URLSession = .shared) async throws -> (Data, URLResponse) {
         let request = try await processURLRequest(request)
         
