@@ -5,6 +5,8 @@ import Foundation
 import DeviceCheck
 
 /// The primary networking request layer for a ProxLock key. We recommend that you use one ``PLSession`` per API key in your app. This will make it far easier to manage.
+///
+/// - Important: For ``PLSession`` and ProxLock to work correctly, you must enable `App Attest` in your `Signing & Capabilities` tab for the target.
 public class PLSession {
     /// The partial key shared by ProxLock when you added your bearer token to the web portal.
     public let partialKey: String
