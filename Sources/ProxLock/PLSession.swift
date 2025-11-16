@@ -4,7 +4,7 @@
 import Foundation
 import DeviceCheck
 
-/// The primary networking request layer for a ProxLock key.
+/// The primary networking request layer for a ProxLock key. We recommend that you use one ``PLSession`` per API key in your app. This will make it far easier to manage.
 public class PLSession {
     /// The partial key shared by ProxLock when you added your bearer token to the web portal.
     public let partialKey: String
