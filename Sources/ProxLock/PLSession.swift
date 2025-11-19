@@ -58,7 +58,14 @@ public class PLSession {
     /// A basic data request wrapper for `URLSession` that automatically wraps the request for ProxLock.
     ///
     /// - Important: This does not include any form of authorization header. To use the bearer token, simply call ``bearerToken`` where you would like the real token to be constructed.
-    public func data(for request: URLRequest, from session: URLSession = .shared) async throws -> (Data, URLResponse) {
+    public func data(from url: URL, from session: URLSession = .shared) async throws -> (Data, URLResponse) {
+        return try await data(for: URLRequest(url: url), from: session)
+    }
+    
+    /// A basic data request wrapper for `URLSession` that automatically wraps the request for ProxLock.
+    ///
+    /// - Important: This does not include any form of authorization header. To use the bearer token, simply call ``bearerToken`` where you would like the real token to be constructed.
+        public func data(for request: URLRequest, from session: URLSession = .shared) async throws -> (Data, URLResponse) {
         let request = try await processURLRequest(request)
         
         return try await session.data(for: request)
