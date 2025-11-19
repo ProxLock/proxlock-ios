@@ -2,6 +2,8 @@
 
 A Swift package that provides a secure and easy networking layer for proxying API requests through [ProxLock's](https://proxlock.dev) service.
 
+To see ProxLock in action, check out our [Demo App](https://github.com/ProxLock/ProxLock-Demo)!
+
 ## Requirements
 
 - **Swift**: 6.2 or later
