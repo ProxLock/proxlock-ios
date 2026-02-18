@@ -12,7 +12,7 @@ public class PLSession {
     public let partialKey: String
     
     /// The id for a this key in ProxLock.
-    public let assosiationID: String
+    public let associationID: String
     
     /// The string that will ultimately be replaced by ProxLock with the final bearer token.
     public var bearerToken: String {
@@ -24,9 +24,9 @@ public class PLSession {
     /// - Parameters:
     ///   - partialKey: The partial key shared by ProxLock when you added your bearer token to the web portal.
     ///   - assosiationID: The id for a this key in ProxLock.
-    public init(partialKey: String, assosiationID: String) {
+    public init(partialKey: String, associationID: String) {
         self.partialKey = partialKey
-        self.assosiationID = assosiationID
+        self.associationID = associationID
     }
     
     /// Translates your `URLRequest` into an object for ProxLock.
@@ -47,7 +47,7 @@ public class PLSession {
         request.setValue(destinationURL.absoluteString, forHTTPHeaderField: "ProxLock_DESTINATION")
         request.setValue("device-check", forHTTPHeaderField: "ProxLock_VALIDATION_MODE")
         request.setValue(destinationMethod.uppercased(), forHTTPHeaderField: "ProxLock_HTTP_METHOD")
-        request.setValue(assosiationID, forHTTPHeaderField: "ProxLock_ASSOCIATION_ID")
+        request.setValue(associationID, forHTTPHeaderField: "ProxLock_ASSOCIATION_ID")
         if let deviceCheckToken = try await getDeviceCheckToken() {
             request.setValue(deviceCheckToken.base64EncodedString(), forHTTPHeaderField: "X-Apple-Device-Token")
         }
