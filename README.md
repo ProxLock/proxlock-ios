@@ -50,7 +50,7 @@ dependencies: [
    
    let session = PLSession(
        partialKey: "your-partial-key",
-       assosiationID: "your-association-id"
+       associationID: "your-association-id"
    )
    ```
 
