@@ -45,7 +45,7 @@ public class PLSession {
         }
         
         // Set proxy components
-        if #available(macOS 13.0, *) {
+        if #available(macOS 13.0, iOS 16.0, watchOS 9.0, tvOS 16.0, *) {
             request.url = apiURL.appending(path: "proxy")
         } else {
             // Fallback on earlier versions
