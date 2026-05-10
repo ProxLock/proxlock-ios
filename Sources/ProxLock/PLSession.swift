@@ -14,6 +14,9 @@ public class PLSession {
     /// The id for a this key in ProxLock.
     public let associationID: String
     
+    /// The API URL used for ProxLock
+    public var apiURL: URL
+    
     /// The string that will ultimately be replaced by ProxLock with the final bearer token.
     public var bearerToken: String {
         "%ProxLock_PARTIAL_KEY:\(partialKey)%"
@@ -24,9 +27,11 @@ public class PLSession {
     /// - Parameters:
     ///   - partialKey: The partial key shared by ProxLock when you added your bearer token to the web portal.
     ///   - assosiationID: The id for a this key in ProxLock.
-    public init(partialKey: String, associationID: String) {
+    ///   - apiURL: The API URL used for ProxLock (defaults to `api.proxlock.dev`)
+    public init(partialKey: String, associationID: String, apiURL: URL = URL(string: "https://api.proxlock.dev")!) {
         self.partialKey = partialKey
         self.associationID = associationID
+        self.apiURL = apiURL
     }
     
     /// Translates your `URLRequest` into an object for ProxLock.
@@ -40,7 +45,12 @@ public class PLSession {
         }
         
         // Set proxy components
-        request.url = URL(string: "https://api.proxlock.dev/proxy")
+        if #available(macOS 13.0, *) {
+            request.url = apiURL.appending(path: "proxy")
+        } else {
+            // Fallback on earlier versions
+            request.url = apiURL.appendingPathComponent("proxy")
+        }
         request.httpMethod = "POST"
         
         // Update headers
