@@ -91,6 +91,26 @@ let proxiedRequest = try await session.processURLRequest(request)
 let (data, response) = try await URLSession.shared.data(for: proxiedRequest)
 ```
 
+### WebSocket Requests
+
+Use `webSocketTask(with:from:)` to create a `URLSessionWebSocketTask` that connects through ProxLock:
+
+```swift
+var request = URLRequest(url: URL(string: "wss://api.example.com/realtime")!)
+request.setValue("Bearer \(session.bearerToken)", forHTTPHeaderField: "Authorization")
+
+let webSocket = try await session.webSocketTask(with: request)
+webSocket.resume()
+```
+
+If you need to inspect or customize the proxied request before creating the task, use `processWebSocketRequest(_:)`:
+
+```swift
+let proxiedRequest = try await session.processWebSocketRequest(request)
+let webSocket = URLSession.shared.webSocketTask(with: proxiedRequest)
+webSocket.resume()
+```
+
 ### Bearer Token Replacement
 
 ProxLock automatically replaces the `bearerToken` placeholder in your requests. Use `session.bearerToken` wherever you would normally use your full bearer token:

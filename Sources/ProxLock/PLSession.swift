@@ -65,6 +65,33 @@ public class PLSession {
         return request
     }
 
+    /// Translates your WebSocket `URLRequest` into an object for ProxLock.
+    ///
+    /// - Important: This does not include any form of authorization header. To use the bearer token, simply call ``bearerToken`` where you would like the real token to be constructed.
+    public func processWebSocketRequest(_ request: URLRequest) async throws -> URLRequest {
+        var request = request
+
+        guard let destinationURL = request.url else {
+            throw URLError(.badURL)
+        }
+
+        guard ["ws", "wss"].contains(destinationURL.scheme?.lowercased()) else {
+            throw URLError(.unsupportedURL)
+        }
+
+        request.url = proxyURL(appendingPathComponents: ["proxy", "ws"], webSocket: true)
+        request.httpMethod = "GET"
+
+        request.setValue(destinationURL.absoluteString, forHTTPHeaderField: "ProxLock_DESTINATION")
+        request.setValue("device-check", forHTTPHeaderField: "ProxLock_VALIDATION_MODE")
+        request.setValue(associationID, forHTTPHeaderField: "ProxLock_ASSOCIATION_ID")
+        if let deviceCheckToken = try await getDeviceCheckToken() {
+            request.setValue(deviceCheckToken.base64EncodedString(), forHTTPHeaderField: "X-Apple-Device-Token")
+        }
+
+        return request
+    }
+
     /// A basic data request wrapper for `URLSession` that automatically wraps the request for ProxLock.
     ///
     /// - Important: This does not include any form of authorization header. To use the bearer token, simply call ``bearerToken`` where you would like the real token to be constructed.
@@ -79,6 +106,22 @@ public class PLSession {
         let request = try await processURLRequest(request)
         
         return try await session.data(for: request)
+    }
+
+    /// A basic WebSocket wrapper for `URLSession` that automatically wraps the request for ProxLock.
+    ///
+    /// - Important: This does not include any form of authorization header. To use the bearer token, simply call ``bearerToken`` where you would like the real token to be constructed.
+    public func webSocketTask(with url: URL, from session: URLSession = .shared) async throws -> URLSessionWebSocketTask {
+        return try await webSocketTask(with: URLRequest(url: url), from: session)
+    }
+
+    /// A basic WebSocket wrapper for `URLSession` that automatically wraps the request for ProxLock.
+    ///
+    /// - Important: This does not include any form of authorization header. To use the bearer token, simply call ``bearerToken`` where you would like the real token to be constructed.
+    public func webSocketTask(with request: URLRequest, from session: URLSession = .shared) async throws -> URLSessionWebSocketTask {
+        let request = try await processWebSocketRequest(request)
+
+        return session.webSocketTask(with: request)
     }
     
     /// Generated token used for Apple Device Check
@@ -107,5 +150,32 @@ public class PLSession {
         
         return token
         #endif
+    }
+
+    private func proxyURL(appendingPathComponents pathComponents: [String], webSocket: Bool) -> URL {
+        var url = apiURL
+
+        for pathComponent in pathComponents {
+            if #available(macOS 13.0, iOS 16.0, watchOS 9.0, tvOS 16.0, *) {
+                url = url.appending(path: pathComponent)
+            } else {
+                url = url.appendingPathComponent(pathComponent)
+            }
+        }
+
+        guard webSocket, var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
+            return url
+        }
+
+        switch components.scheme?.lowercased() {
+        case "https":
+            components.scheme = "wss"
+        case "http":
+            components.scheme = "ws"
+        default:
+            break
+        }
+
+        return components.url ?? url
     }
 }
